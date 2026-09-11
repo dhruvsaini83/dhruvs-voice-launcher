@@ -18,7 +18,7 @@ A modern, hands-free Chrome Extension and Web Launcher that allows you to open a
 
 1. Clone or download this repository:
    ```bash
-   git clone https://github.com/<YOUR-USERNAME>/<YOUR-REPO-NAME>.git
+   git clone https://github.com/dhruvsaini83/dhruvs-voice-launcher.git
    ```
 2. Open Google Chrome (or any Chromium-based browser like Brave, Edge, Opera).
 3. Navigate to `chrome://extensions`.
