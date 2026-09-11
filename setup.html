@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Dhruv's Voice Launcher — Enable Microphone</title>
+<style>
+  body {
+    font-family: -apple-system, sans-serif;
+    background: #111;
+    color: #eee;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+    text-align: center;
+  }
+  h1 { font-weight: 500; }
+  p { color: #999; max-width: 400px; line-height: 1.6; }
+  button {
+    padding: 14px 28px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: none;
+    background: #4caf50;
+    color: white;
+    cursor: pointer;
+    margin-top: 16px;
+  }
+  #status { margin-top: 16px; font-size: 14px; color: #ccc; }
+</style>
+</head>
+<body>
+  <h1>🎙️ Enable microphone</h1>
+  <p>Click below and choose "Allow" when Chrome asks for microphone access. Then just say "Open" + any website - "Open Netflix", "Open Amazon" - or "Close" to close the current tab, from anywhere in the room. This only needs to be done once.</p>
+  <button id="grantBtn">Allow microphone access</button>
+  <div id="status"></div>
+  <script src="setup.js"></script>
+</body>
+</html>
