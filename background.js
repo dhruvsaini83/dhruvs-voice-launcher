@@ -208,6 +208,24 @@ function hostnameOf(urlString) {
   }
 }
 
+// Safely close a tab without shutting the browser.
+// If this is the LAST tab in its window, first open a new tab so the
+// browser stays alive before removing the target tab.
+async function safeCloseTab(tabId, windowId) {
+  try {
+    const tabsInWindow = await chrome.tabs.query({ windowId });
+    if (tabsInWindow.length <= 1) {
+      // Only one tab left — open a new blank tab to keep the window alive
+      console.log("[Dhruv's Voice Launcher - background] last tab in window, opening new tab to keep browser alive");
+      await chrome.tabs.create({ windowId, url: 'chrome://newtab' });
+    }
+    chrome.tabs.remove(tabId);
+  } catch (err) {
+    console.warn("[Dhruv's Voice Launcher - background] safeCloseTab error:", err);
+    chrome.tabs.remove(tabId);
+  }
+}
+
 async function handleCloseCommand(targetUrl, spoken) {
   if (!targetUrl) {
     // Plain "close" - close whichever tab is currently active in the
@@ -219,7 +237,7 @@ async function handleCloseCommand(targetUrl, spoken) {
     }
     if (activeTab) {
       console.log("[Dhruv's Voice Launcher - background] closing active tab:", activeTab.url);
-      chrome.tabs.remove(activeTab.id);
+      await safeCloseTab(activeTab.id, activeTab.windowId);
     } else {
       console.log("[Dhruv's Voice Launcher - background] \"close\" heard but no active tab found");
     }
@@ -241,7 +259,7 @@ async function handleCloseCommand(targetUrl, spoken) {
   const toClose = matches.find(t => t.active) ||
     matches.sort((a, b) => (b.lastAccessed || 0) - (a.lastAccessed || 0))[0];
   console.log("[Dhruv's Voice Launcher - background] closing tab matching", spoken, '->', toClose.url);
-  chrome.tabs.remove(toClose.id);
+  await safeCloseTab(toClose.id, toClose.windowId);
 }
 
 async function openSiteWithConfetti(url) {
