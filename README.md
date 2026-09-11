@@ -13,17 +13,46 @@ Just say **"Open YouTube"** or **"Open Netflix"** anywhere in your browser, and 
 
 ## ✨ Features
 
-- 🗣️ **Truly Hands-Free Navigation**: Speak commands without touching your mouse or opening the popup every time.
-- 🔒 **Smart Lifecycle & Privacy Protection**: Microphone access is strictly active **only while a browser window is open**. As soon as you close your browser windows, microphone hardware tracks are immediately released and speech recognition stops.
-- 🔄 **Auto-Resume on Launch**: Re-opening Chrome automatically reactivates voice commands seamlessly without asking for permissions again.
-- ⚡ **Zero-Latency Instant Matching**: Recognizes interim speech streams in real time with debounce cooldown — websites open the moment you finish your command.
-- 🌐 **Smart Website Resolver**:
-  - Direct mappings for popular platforms: YouTube, Netflix, Prime Video, Disney+ Hotstar, JioCinema, Amazon India, Flipkart, ChatGPT, Gemini, Claude, WhatsApp Web, Telegram, Instagram, Twitter/X, Spotify, GitHub, LinkedIn, Reddit, Cricbuzz, and more.
-  - Generic fallback for any spoken website (e.g., *"Open apple.com"*, *"Open moneycontrol"*).
-- 🇮🇳 **Bilingual & Natural Variations**: Supports natural speech patterns including `"Open YouTube"`, `"YouTube open"`, `"Open karo YouTube"`, `"Launch Netflix"`, `"Go to Google"`, and `"Close"`.
-- 🎉 **Visual Confetti Burst**: Celebratory confetti effect injected into newly opened pages upon voice launch.
-- 🛡️ **Self-Healing Offscreen Engine**: Runs a resilient Chrome `offscreen` document with continuous audio keepalive and watchdog alarms while Chrome is active.
-- 📱 **Samsung Internet & Mobile Compatibility**: Includes a dedicated fullscreen Web Launcher (`samsung_launcher.html`) optimized for mobile browsers and touch/voice interaction.
+### 🗣️ Voice Control
+- **Truly Hands-Free Navigation**: Speak commands without touching your mouse or opening the popup — just talk and it works.
+- **Bilingual & Natural Variations**: Understands multiple natural speech patterns:
+  - `"Open YouTube"` / `"YouTube open"` / `"Open karo YouTube"` / `"YouTube kholo"`
+  - `"Launch Netflix"` / `"Go to Spotify"` / `"Open karo Hotstar"` / `"JioCinema kholo"`
+  - `"Close"` / `"Close tab"` / `"Band karo"` / `"Close YouTube"`
+- **Zero-Latency Instant Matching**: Processes interim speech in real time with debounce cooldown — sites open the moment your command is complete.
+- **Smart Close — Last Tab Protection**: If you say *"Close YouTube"* and it's the **only tab open**, the extension automatically opens a new tab first so your browser stays alive, then closes the target tab.
+
+### 🌐 Smart Website Resolver
+- **50+ Pre-Mapped Sites**: Direct voice-to-URL mappings for:
+  - 🎬 **Streaming:** YouTube, Netflix, Amazon Prime Video, Disney+ Hotstar, JioCinema
+  - 🤖 **AI Assistants:** ChatGPT, Google Gemini, Claude (Anthropic)
+  - 💬 **Social & Messaging:** WhatsApp Web, Telegram, Instagram, Twitter/X, Facebook, LinkedIn, Reddit
+  - 🛍️ **Shopping:** Amazon India, Flipkart
+  - 📧 **Google Apps:** Gmail, Google Drive, Google Maps, Google Calendar, Google Meet, Google Translate
+  - 🎵 **Music:** Spotify
+  - 👨‍💻 **Dev Tools:** GitHub, Stack Overflow, Canva, Speedtest
+  - 📰 **News & Sports:** Cricbuzz, Google News, Aaj Tak, NDTV
+- **Generic Fallback Resolver**: Any site not in the dictionary is automatically resolved — say *"Open moneycontrol"* or *"Open apple.com"* and it works.
+- **Dot Notation Support**: Say *"google dot com"* and it converts to `google.com` automatically.
+
+### 🔒 Privacy & Lifecycle
+- **Mic Active Only While Browser is Open**: Microphone hardware tracks are strictly held **only when at least one browser window is open**.
+- **Instant Release on Browser Close**: When all Chrome windows are closed, speech recognition is immediately aborted and all audio stream tracks are released — the mic indicator on Windows disappears instantly.
+- **Auto-Resume on Browser Open**: Re-opening Chrome automatically restarts the voice listener with no prompts or clicks needed.
+- **Healthcheck Alarm Guard**: A background alarm verifies the listener is healthy while Chrome is open, and skips any restart if no browser windows are detected.
+
+### 🛡️ Reliability
+- **Self-Healing Offscreen Engine**: Runs a resilient Chrome `offscreen` document with continuous audio keepalive and watchdog timer alarms to keep listening active while Chrome is open.
+- **Concurrency-Safe Offscreen Management**: Serialized offscreen document creation prevents race conditions when multiple triggers fire simultaneously.
+- **Watchdog Timer**: Every 4 seconds checks if recognition has silently died and restarts it automatically.
+- **Recognition Error Handling**: Handles `no-speech`, `audio-capture`, and `not-allowed` errors gracefully without crashing the listener.
+
+### 🎉 Visual Feedback
+- **Confetti Burst on Open**: A celebratory confetti animation is injected into the newly opened page when a site is launched by voice.
+- **Real-Time Status Popup**: The extension popup shows live status — *"Listening Hands-Free"*, last spoken command, and mic permission state.
+
+### 📱 Mobile & Samsung Internet
+- **Fullscreen Web Launcher** (`samsung_launcher.html`): A dedicated standalone voice launcher page optimized for mobile browsers and Samsung Internet with a large tap-to-speak interface.
 
 ---
 
@@ -57,9 +86,9 @@ Upon loading, the **Setup Page** (`setup.html`) will automatically open in a tab
 | **"Open [site]"** | *"Open YouTube"*, *"Open Netflix"*, *"Open ChatGPT"* | Launches website in a new tab |
 | **"[site] Open"** | *"YouTube open"*, *"Google open"*, *"WhatsApp open"* | Launches website in a new tab |
 | **"Launch / Go to [site]"** | *"Launch Prime Video"*, *"Go to Spotify"* | Launches website in a new tab |
-| **"Open karo [site]"** | *"Open karo Hotstar"*, *"JioCinema kholo"* | Launches website in a new tab |
-| **"Close"** | *"Close"*, *"Close tab"*, *"Band karo"* | Closes the currently active tab |
-| **"Close [site]"** | *"Close YouTube"*, *"Close Netflix"* | Closes the tab matching that site |
+| **"Open karo / Kholo [site]"** | *"Open karo Hotstar"*, *"JioCinema kholo"* | Launches website in a new tab |
+| **"Close"** | *"Close"*, *"Close tab"*, *"Band karo"* | Closes the currently active tab (opens new tab if it's the last one) |
+| **"Close [site]"** | *"Close YouTube"*, *"Close Netflix"* | Closes the matching tab (opens new tab if it's the last one) |
 
 ### Popular Pre-Mapped Services
 - **Video / Streaming:** YouTube, Netflix, Amazon Prime Video, Disney+ Hotstar, JioCinema, Twitch
@@ -96,7 +125,8 @@ Voice Chrome Ext/
 
 - **Microphone blocked?** Click the camera/microphone icon in the Chrome URL bar on the `setup.html` page and select *"Always allow"*.
 - **Extension not hearing commands?** Open `chrome://extensions` and click the **Reload (🔄)** icon on Dhruv's Voice Launcher. Make sure microphone permission is granted.
-- **Does it use mic when Chrome is closed?** No. The extension automatically detects when all browser windows are closed, immediately terminates audio tracks, and closes the offscreen document to protect your privacy and battery.
+- **Does it use the mic when Chrome is closed?** **No.** The extension automatically detects when all browser windows are closed and immediately releases the microphone — the Windows taskbar mic indicator will disappear.
+- **Why did a new tab open when I closed a site?** This is intentional! If you close the last remaining tab via voice, the extension opens a new tab first so Chrome doesn't shut down and lose the voice listener.
 - **Microphone access in Windows:** Ensure Windows Settings > Privacy & Security > Microphone has allowed desktop apps to access the microphone.
 
 ---
