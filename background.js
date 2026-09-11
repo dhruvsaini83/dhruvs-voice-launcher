@@ -6,6 +6,19 @@
 // also swallow that specific error if it slips through anyway.
 let creatingOffscreen = null;
 
+async function hasOpenBrowserWindow() {
+  try {
+    if (!chrome.windows || typeof chrome.windows.getAll !== 'function') {
+      return true; // fallback if windows API unavailable
+    }
+    const windows = await chrome.windows.getAll({ windowTypes: ['normal', 'popup'] });
+    return Boolean(windows && windows.length > 0);
+  } catch (err) {
+    console.warn("[Dhruv's Voice Launcher - background] Error checking open windows:", err);
+    return false;
+  }
+}
+
 async function hasOffscreenDoc() {
   if (chrome.offscreen && typeof chrome.offscreen.hasDocument === 'function') {
     return await chrome.offscreen.hasDocument();
@@ -17,6 +30,22 @@ async function hasOffscreenDoc() {
   return false;
 }
 
+async function stopListeningAndCloseOffscreen() {
+  try {
+    await chrome.runtime.sendMessage({ type: 'STOP_LISTENING' }).catch(() => {});
+  } catch (e) {}
+
+  try {
+    const exists = await hasOffscreenDoc();
+    if (exists && chrome.offscreen && typeof chrome.offscreen.closeDocument === 'function') {
+      await chrome.offscreen.closeDocument();
+      console.log("[Dhruv's Voice Launcher - background] offscreen document closed and microphone released");
+    }
+  } catch (err) {
+    console.warn("[Dhruv's Voice Launcher - background] Error closing offscreen document:", err);
+  }
+}
+
 async function ensureOffscreen() {
   if (creatingOffscreen) {
     await creatingOffscreen;
@@ -26,6 +55,13 @@ async function ensureOffscreen() {
   // Fallback for mobile / platforms where chrome.offscreen is unavailable
   if (!chrome.offscreen || typeof chrome.offscreen.createDocument !== 'function') {
     console.warn("[Dhruv's Voice Launcher - background] chrome.offscreen is not supported in this browser context.");
+    return;
+  }
+
+  // Do not keep microphone or offscreen document running if no browser window is open
+  const hasWindow = await hasOpenBrowserWindow();
+  if (!hasWindow) {
+    console.log("[Dhruv's Voice Launcher - background] No browser windows open. Skipping offscreen creation.");
     return;
   }
 
@@ -61,7 +97,10 @@ async function autoStartIfGranted() {
   const { micGranted } = await chrome.storage.local.get(['micGranted']);
   console.log("[Dhruv's Voice Launcher - background] autoStartIfGranted, micGranted=", micGranted);
   if (micGranted) {
-    await ensureOffscreen();
+    const hasWindow = await hasOpenBrowserWindow();
+    if (hasWindow) {
+      await ensureOffscreen();
+    }
   }
 }
 
@@ -85,12 +124,54 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
   const { micGranted } = await chrome.storage.local.get(['micGranted']);
   if (!micGranted) return;
 
+  const hasWindow = await hasOpenBrowserWindow();
+  if (!hasWindow) {
+    // If no browser window is open, release mic and shut down offscreen doc
+    if (await hasOffscreenDoc()) {
+      console.log("[Dhruv's Voice Launcher - background] healthcheck: No browser window open, closing offscreen doc.");
+      await stopListeningAndCloseOffscreen();
+    }
+    return;
+  }
+
   const exists = await hasOffscreenDoc();
   if (!exists) {
     console.log("[Dhruv's Voice Launcher - background] healthcheck: offscreen document missing, recreating");
     await ensureOffscreen();
   }
 });
+
+// Monitor window closure: When all browser windows are closed, release microphone immediately
+if (chrome.windows && chrome.windows.onRemoved) {
+  chrome.windows.onRemoved.addListener(async (closedWindowId) => {
+    try {
+      const allWindows = await chrome.windows.getAll({ windowTypes: ['normal', 'popup'] });
+      const remaining = allWindows.filter(w => w.id !== closedWindowId);
+      if (remaining.length === 0) {
+        console.log("[Dhruv's Voice Launcher - background] All browser windows closed. Stopping microphone.");
+        await stopListeningAndCloseOffscreen();
+      }
+    } catch (err) {
+      console.warn("[Dhruv's Voice Launcher - background] Error in windows.onRemoved:", err);
+    }
+  });
+}
+
+// Monitor window creation: When a browser window is opened, reactivate listening if permission was granted
+if (chrome.windows && chrome.windows.onCreated) {
+  chrome.windows.onCreated.addListener(async () => {
+    try {
+      const { micGranted } = await chrome.storage.local.get(['micGranted']);
+      if (micGranted) {
+        console.log("[Dhruv's Voice Launcher - background] Browser window opened. Ensuring offscreen listening is active.");
+        await ensureOffscreen();
+        chrome.runtime.sendMessage({ type: 'START_LISTENING' }).catch(() => {});
+      }
+    } catch (err) {
+      console.warn("[Dhruv's Voice Launcher - background] Error in windows.onCreated:", err);
+    }
+  });
+}
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   console.log("[Dhruv's Voice Launcher - background] received message", msg);

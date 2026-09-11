@@ -2,7 +2,8 @@
 
 [![Manifest V3](https://img.shields.io/badge/Chrome_Extension-Manifest_V3-4285F4?logo=googlechrome&logoColor=white)](https://developer.chrome.com/docs/extensions/mv3/intro/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Hands-Free](https://img.shields.io/badge/Listening-Hands--Free%2024%2F7-22c55e)](#-features)
+[![Hands-Free](https://img.shields.io/badge/Listening-Hands--Free-22c55e)](#-features)
+[![Privacy Friendly](https://img.shields.io/badge/Microphone-Auto--Sleep%20on%20Close-blue)](#-features)
 
 A modern, truly **hands-free Chrome Extension** and **Web Launcher** that allows you to open and close websites directly using voice commands — **no clicking required!**
 
@@ -13,13 +14,15 @@ Just say **"Open YouTube"** or **"Open Netflix"** anywhere in your browser, and 
 ## ✨ Features
 
 - 🗣️ **Truly Hands-Free Navigation**: Speak commands without touching your mouse or opening the popup every time.
+- 🔒 **Smart Lifecycle & Privacy Protection**: Microphone access is strictly active **only while a browser window is open**. As soon as you close your browser windows, microphone hardware tracks are immediately released and speech recognition stops.
+- 🔄 **Auto-Resume on Launch**: Re-opening Chrome automatically reactivates voice commands seamlessly without asking for permissions again.
 - ⚡ **Zero-Latency Instant Matching**: Recognizes interim speech streams in real time with debounce cooldown — websites open the moment you finish your command.
 - 🌐 **Smart Website Resolver**:
   - Direct mappings for popular platforms: YouTube, Netflix, Prime Video, Disney+ Hotstar, JioCinema, Amazon India, Flipkart, ChatGPT, Gemini, Claude, WhatsApp Web, Telegram, Instagram, Twitter/X, Spotify, GitHub, LinkedIn, Reddit, Cricbuzz, and more.
   - Generic fallback for any spoken website (e.g., *"Open apple.com"*, *"Open moneycontrol"*).
 - 🇮🇳 **Bilingual & Natural Variations**: Supports natural speech patterns including `"Open YouTube"`, `"YouTube open"`, `"Open karo YouTube"`, `"Launch Netflix"`, `"Go to Google"`, and `"Close"`.
 - 🎉 **Visual Confetti Burst**: Celebratory confetti effect injected into newly opened pages upon voice launch.
-- 🛡️ **Self-Healing Offscreen Engine**: Runs a resilient Chrome `offscreen` document with continuous audio keepalive and watchdog alarms to ensure listening stays active in the background.
+- 🛡️ **Self-Healing Offscreen Engine**: Runs a resilient Chrome `offscreen` document with continuous audio keepalive and watchdog alarms while Chrome is active.
 - 📱 **Samsung Internet & Mobile Compatibility**: Includes a dedicated fullscreen Web Launcher (`samsung_launcher.html`) optimized for mobile browsers and touch/voice interaction.
 
 ---
@@ -93,7 +96,8 @@ Voice Chrome Ext/
 
 - **Microphone blocked?** Click the camera/microphone icon in the Chrome URL bar on the `setup.html` page and select *"Always allow"*.
 - **Extension not hearing commands?** Open `chrome://extensions` and click the **Reload (🔄)** icon on Dhruv's Voice Launcher. Make sure microphone permission is granted.
-- **Microphone sleep on Windows?** Ensure Windows Settings > Privacy & Security > Microphone has allowed desktop apps to access the microphone.
+- **Does it use mic when Chrome is closed?** No. The extension automatically detects when all browser windows are closed, immediately terminates audio tracks, and closes the offscreen document to protect your privacy and battery.
+- **Microphone access in Windows:** Ensure Windows Settings > Privacy & Security > Microphone has allowed desktop apps to access the microphone.
 
 ---
 

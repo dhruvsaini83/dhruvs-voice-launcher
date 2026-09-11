@@ -257,15 +257,34 @@ function resolveUrl(spoken) {
 
 function endDetection() {
   shouldBeRunning = false;
+  running = false;
+  starting = false;
   if (recognition) {
-    recognition.stop();
+    try {
+      recognition.abort();
+    } catch (e) {
+      try {
+        recognition.stop();
+      } catch (e2) {}
+    }
+    recognition = null;
   }
   if (activeAudioStream) {
-    activeAudioStream.getTracks().forEach(t => t.stop());
+    try {
+      activeAudioStream.getTracks().forEach(t => t.stop());
+    } catch (e) {}
     activeAudioStream = null;
   }
-  console.log("[Dhruv's Voice Launcher - offscreen] stop requested");
+  console.log("[Dhruv's Voice Launcher - offscreen] detection ended and audio tracks released");
 }
+
+window.addEventListener('beforeunload', () => {
+  endDetection();
+});
+
+window.addEventListener('unload', () => {
+  endDetection();
+});
 
 chrome.runtime.onMessage.addListener((msg) => {
   console.log("[Dhruv's Voice Launcher - offscreen] received message", msg);
