@@ -60,6 +60,7 @@
       font-weight: 700;
       letter-spacing: -0.5px;
       background: linear-gradient(180deg, #ffffff 0%, #cbd5e1 100%);
+      background-clip: text;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
@@ -291,7 +292,8 @@
     <div id="transcriptCard" class="transcript-card"></div>
 
     <form id="commandForm" class="command-form" onsubmit="return false;">
-      <input type="text" id="commandInput" class="command-input" placeholder="Say or type 'Open Netflix'..." autocomplete="off" />
+      <input type="text" id="commandInput" class="command-input" placeholder="Say or type 'Open Netflix'..."
+        autocomplete="off" />
       <button type="submit" id="goBtn" class="go-button">Go ➔</button>
     </form>
   </div>

@@ -3,8 +3,13 @@
   "name": "Dhruv's Voice Launcher",
   "version": "3.0",
   "description": "Say Open + any website to launch it, and Close to close it - all hands-free.",
-  "permissions": ["tabs", "storage", "alarms"],
-  "optional_permissions": ["offscreen", "scripting"],
+  "permissions": [
+    "tabs",
+    "storage",
+    "alarms",
+    "offscreen",
+    "scripting"
+  ],
   "host_permissions": ["<all_urls>"],
   "options_page": "setup.html",
   "background": {

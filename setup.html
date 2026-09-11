@@ -1,41 +1,152 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Dhruv's Voice Launcher — Enable Microphone</title>
-<style>
-  body {
-    font-family: -apple-system, sans-serif;
-    background: #111;
-    color: #eee;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    margin: 0;
-    text-align: center;
-  }
-  h1 { font-weight: 500; }
-  p { color: #999; max-width: 400px; line-height: 1.6; }
-  button {
-    padding: 14px 28px;
-    font-size: 16px;
-    border-radius: 8px;
-    border: none;
-    background: #4caf50;
-    color: white;
-    cursor: pointer;
-    margin-top: 16px;
-  }
-  #status { margin-top: 16px; font-size: 14px; color: #ccc; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dhruv's Voice Launcher — Setup</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    body {
+      background: radial-gradient(circle at top, #1e293b 0%, #0f172a 100%);
+      color: #f8fafc;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+      text-align: center;
+    }
+    .card {
+      background: rgba(30, 41, 59, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      border-radius: 20px;
+      padding: 40px 32px;
+      max-width: 520px;
+      width: 100%;
+    }
+    .icon-badge {
+      width: 68px;
+      height: 68px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #3b82f6, #6366f1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      margin: 0 auto 20px auto;
+      box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.5);
+    }
+    h1 {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 12px;
+      background: linear-gradient(180deg, #ffffff 0%, #cbd5e1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    p.desc {
+      color: #94a3b8;
+      font-size: 14.5px;
+      line-height: 1.6;
+      margin-bottom: 28px;
+    }
+    .btn-grant {
+      background: linear-gradient(135deg, #2563eb, #3b82f6);
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 12px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 10px 20px -3px rgba(37, 99, 235, 0.4);
+      transition: all 0.2s ease;
+      width: 100%;
+    }
+    .btn-grant:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 28px -3px rgba(37, 99, 235, 0.5);
+    }
+    .btn-grant:active {
+      transform: translateY(0);
+    }
+    .status-msg {
+      margin-top: 20px;
+      font-size: 14px;
+      line-height: 1.5;
+      min-height: 24px;
+    }
+    .tips {
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      text-align: left;
+    }
+    .tips h3 {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: #64748b;
+      margin-bottom: 12px;
+    }
+    .tip-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #cbd5e1;
+      font-size: 13.5px;
+      margin-bottom: 8px;
+    }
+    .badge {
+      background: rgba(59, 130, 246, 0.15);
+      color: #60a5fa;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+  </style>
 </head>
 <body>
-  <h1>🎙️ Enable microphone</h1>
-  <p>Click below and choose "Allow" when Chrome asks for microphone access. Then just say "Open" + any website - "Open Netflix", "Open Amazon" - or "Close" to close the current tab, from anywhere in the room. This only needs to be done once.</p>
-  <button id="grantBtn">Allow microphone access</button>
-  <div id="status"></div>
+  <div class="card">
+    <div class="icon-badge">🎙️</div>
+    <h1>Enable Hands-Free Voice</h1>
+    <p class="desc">
+      Grant microphone permission once. After this, you don't need to click anything — simply say <b>"Open YouTube"</b> or <b>"Open Netflix"</b> anywhere in your browser hands-free!
+    </p>
+
+    <button id="grantBtn" class="btn-grant">
+      <span>Allow Microphone Access</span> ➔
+    </button>
+
+    <div id="status" class="status-msg"></div>
+
+    <div class="tips">
+      <h3>Commands you can say directly:</h3>
+      <div class="tip-item"><span class="badge">"Open YouTube"</span> Launches YouTube instantly</div>
+      <div class="tip-item"><span class="badge">"Open Google"</span> Launches Google Search</div>
+      <div class="tip-item"><span class="badge">"Open Netflix"</span> Launches Netflix</div>
+      <div class="tip-item"><span class="badge">"Close"</span> Closes current active tab</div>
+    </div>
+  </div>
+
   <script src="setup.js"></script>
 </body>
 </html>

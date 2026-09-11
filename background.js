@@ -6,37 +6,46 @@
 // also swallow that specific error if it slips through anyway.
 let creatingOffscreen = null;
 
+async function hasOffscreenDoc() {
+  if (chrome.offscreen && typeof chrome.offscreen.hasDocument === 'function') {
+    return await chrome.offscreen.hasDocument();
+  }
+  if (chrome.runtime && typeof chrome.runtime.getContexts === 'function') {
+    const existing = await chrome.runtime.getContexts({ contextTypes: ['OFFSCREEN_DOCUMENT'] });
+    return existing.length > 0;
+  }
+  return false;
+}
+
 async function ensureOffscreen() {
   if (creatingOffscreen) {
     await creatingOffscreen;
     return;
   }
 
-  // Graceful fallback for mobile / Samsung Internet where chrome.offscreen is unavailable
+  // Fallback for mobile / platforms where chrome.offscreen is unavailable
   if (!chrome.offscreen || typeof chrome.offscreen.createDocument !== 'function') {
-    console.warn("[Dhruv's Voice Launcher - background] chrome.offscreen is not supported in this browser (Samsung Internet/Mobile). Voice commands work via Popup or Web Launcher.");
+    console.warn("[Dhruv's Voice Launcher - background] chrome.offscreen is not supported in this browser context.");
     return;
   }
 
   creatingOffscreen = (async () => {
-    const existing = chrome.runtime.getContexts
-      ? await chrome.runtime.getContexts({ contextTypes: ['OFFSCREEN_DOCUMENT'] })
-      : [];
-    console.log("[Dhruv's Voice Launcher - background] existing offscreen docs:", existing.length);
-    if (existing.length > 0) return;
-
     try {
+      const exists = await hasOffscreenDoc();
+      console.log("[Dhruv's Voice Launcher - background] offscreen document exists:", exists);
+      if (exists) return;
+
       await chrome.offscreen.createDocument({
         url: 'offscreen.html',
-        reasons: ['USER_MEDIA'],
-        justification: 'Listen to microphone to detect claps or voice commands'
+        reasons: [chrome.offscreen.Reason?.USER_MEDIA || 'USER_MEDIA'],
+        justification: 'Listen to microphone for hands-free voice navigation'
       });
-      console.log("[Dhruv's Voice Launcher - background] offscreen document created");
+      console.log("[Dhruv's Voice Launcher - background] offscreen document created successfully");
     } catch (err) {
-      if (err.message && err.message.includes('single offscreen document')) {
-        console.log("[Dhruv's Voice Launcher - background] offscreen document already exists (race), ignoring");
+      if (err.message && (err.message.includes('single offscreen document') || err.message.includes('already exists'))) {
+        console.log("[Dhruv's Voice Launcher - background] offscreen document already exists, ignoring error");
       } else {
-        console.warn("[Dhruv's Voice Launcher - background] offscreen creation skipped/failed:", err.message);
+        console.warn("[Dhruv's Voice Launcher - background] offscreen creation failed:", err);
       }
     }
   })();
@@ -57,22 +66,27 @@ async function autoStartIfGranted() {
 }
 
 chrome.runtime.onStartup.addListener(autoStartIfGranted);
-chrome.runtime.onInstalled.addListener(autoStartIfGranted);
 
-// A second layer of self-healing, at the extension level rather than
-// inside the offscreen document: chrome.alarms keeps firing even after
-// the background service worker itself has gone idle and been unloaded,
-// so this periodically confirms the offscreen document (where listening
-// actually happens) is still alive, and recreates it if Chrome ever
-// tore it down for its own reasons.
+chrome.runtime.onInstalled.addListener(async (details) => {
+  console.log("[Dhruv's Voice Launcher - background] onInstalled fired:", details.reason);
+  const { micGranted } = await chrome.storage.local.get(['micGranted']);
+  if (!micGranted) {
+    console.log("[Dhruv's Voice Launcher - background] Microphone permission not yet granted. Opening setup.html");
+    chrome.tabs.create({ url: chrome.runtime.getURL('setup.html') });
+  } else {
+    await ensureOffscreen();
+  }
+});
+
+// A layer of self-healing: alarms keep firing even after service worker idles
 chrome.alarms.create('voice-launcher-healthcheck', { periodInMinutes: 1 });
 chrome.alarms.onAlarm.addListener(async (alarm) => {
   if (alarm.name !== 'voice-launcher-healthcheck') return;
   const { micGranted } = await chrome.storage.local.get(['micGranted']);
   if (!micGranted) return;
 
-  const existing = await chrome.runtime.getContexts({ contextTypes: ['OFFSCREEN_DOCUMENT'] });
-  if (existing.length === 0) {
+  const exists = await hasOffscreenDoc();
+  if (!exists) {
     console.log("[Dhruv's Voice Launcher - background] healthcheck: offscreen document missing, recreating");
     await ensureOffscreen();
   }
@@ -83,6 +97,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
   if (msg.type === 'START_LISTENING') {
     ensureOffscreen();
+    sendResponse({ ok: true });
   }
 
   if (msg.type === 'VOICE_COMMAND') {
@@ -101,8 +116,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   return true;
 });
 
-// Also try on service worker cold-start, in case onStartup/onInstalled
-// already fired before this load (e.g. after an extension reload).
+// Cold-start initialization
 autoStartIfGranted();
 
 function hostnameOf(urlString) {
@@ -117,7 +131,11 @@ async function handleCloseCommand(targetUrl, spoken) {
   if (!targetUrl) {
     // Plain "close" - close whichever tab is currently active in the
     // currently focused window (the "I'm looking at it, close it" case).
-    const [activeTab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+    let [activeTab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+    if (!activeTab) {
+      const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+      activeTab = tabs[0];
+    }
     if (activeTab) {
       console.log("[Dhruv's Voice Launcher - background] closing active tab:", activeTab.url);
       chrome.tabs.remove(activeTab.id);
