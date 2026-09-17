@@ -260,6 +260,80 @@
       transform: scale(0.96);
     }
 
+    /* ON/OFF Power Toggle */
+    .power-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 14px;
+      background: rgba(15, 23, 42, 0.55);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 14px;
+      padding: 10px 18px;
+      width: 100%;
+      max-width: 420px;
+    }
+    .power-row-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #cbd5e1;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex: 1;
+    }
+    .toggle-switch {
+      position: relative;
+      width: 52px;
+      height: 26px;
+      flex-shrink: 0;
+    }
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+      position: absolute;
+    }
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      inset: 0;
+      background: rgba(239, 68, 68, 0.4);
+      border: 1.5px solid rgba(239, 68, 68, 0.6);
+      border-radius: 26px;
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      left: 2px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #f87171;
+      border-radius: 50%;
+      transition: transform 0.3s cubic-bezier(.4,0,.2,1), background 0.3s;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+    .toggle-switch input:checked + .toggle-slider {
+      background: rgba(34, 197, 94, 0.25);
+      border-color: rgba(34, 197, 94, 0.6);
+    }
+    .toggle-switch input:checked + .toggle-slider::before {
+      transform: translateX(26px) translateY(-50%);
+      background: #4ade80;
+    }
+    .toggle-state-text {
+      font-size: 12px;
+      font-weight: 700;
+      min-width: 24px;
+      transition: color 0.3s;
+    }
+    .toggle-state-text.on  { color: #4ade80; }
+    .toggle-state-text.off { color: #f87171; }
+
     footer {
       font-size: 12px;
       color: #64748b;
@@ -282,6 +356,16 @@
     <p class="subtitle">Tap the mic and say <strong>"Open [Website]"</strong> (e.g. "Open YouTube", "Open Netflix") to
       jump right in.</p>
   </header>
+
+  <!-- ON/OFF Sync Toggle -->
+  <div class="power-row" id="powerRow">
+    <div class="power-row-label">⚡ Background Voice (Extension)</div>
+    <span id="slToggleText" class="toggle-state-text on">ON</span>
+    <label class="toggle-switch" title="Extension Voice ON/OFF">
+      <input type="checkbox" id="slVoicePowerToggle" checked>
+      <span class="toggle-slider"></span>
+    </label>
+  </div>
 
   <div class="voice-hub">
     <div id="micRing" class="mic-ring-container">

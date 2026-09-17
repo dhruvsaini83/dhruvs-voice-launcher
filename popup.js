@@ -104,4 +104,16 @@ micToggleBtn.addEventListener('click', () => {
   });
 });
 
+// ── Real-time sync: if web launcher or any other page changes voiceEnabled,
+//    update this popup's UI immediately without needing a reload ──────────────
+if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.onChanged) {
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area === 'local' && 'voiceEnabled' in changes) {
+      const newVal = changes.voiceEnabled.newValue;
+      const enabled = (newVal === undefined || newVal === true);
+      applyVoiceState(enabled);
+    }
+  });
+}
+
 checkMicStatus();

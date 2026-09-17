@@ -3,6 +3,56 @@ const mainMicBtn = document.getElementById('mainMicBtn');
 const statusLabel = document.getElementById('statusLabel');
 const transcriptCard = document.getElementById('transcriptCard');
 
+// ─── ON/OFF Sync Toggle (synced with extension popup via chrome.storage) ────
+const slToggle = document.getElementById('slVoicePowerToggle');
+const slToggleText = document.getElementById('slToggleText');
+
+function applySlToggleUI(isEnabled) {
+  slToggle.checked = isEnabled;
+  if (isEnabled) {
+    slToggleText.textContent = 'ON';
+    slToggleText.className = 'toggle-state-text on';
+  } else {
+    slToggleText.textContent = 'OFF';
+    slToggleText.className = 'toggle-state-text off';
+  }
+}
+
+// Load saved state from extension storage on page open
+if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+  chrome.storage.local.get(['voiceEnabled'], (data) => {
+    const enabled = (data.voiceEnabled === undefined || data.voiceEnabled === true);
+    applySlToggleUI(enabled);
+  });
+
+  // Real-time sync: when popup toggle changes, this page updates automatically
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area === 'local' && 'voiceEnabled' in changes) {
+      const newVal = changes.voiceEnabled.newValue;
+      const enabled = (newVal === undefined || newVal === true);
+      applySlToggleUI(enabled);
+    }
+  });
+}
+
+// When toggled here, write to storage → popup will pick it up via onChanged
+if (slToggle) {
+  slToggle.addEventListener('change', () => {
+    const isEnabled = slToggle.checked;
+    applySlToggleUI(isEnabled);
+    if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+      chrome.storage.local.set({ voiceEnabled: isEnabled });
+      // Tell background service worker to start/stop
+      if (chrome.runtime && chrome.runtime.sendMessage) {
+        chrome.runtime.sendMessage({
+          type: isEnabled ? 'START_LISTENING' : 'STOP_LISTENING'
+        }).catch(() => {});
+      }
+    }
+  });
+}
+// ────────────────────────────────────────────────────────────────────────────
+
 let isListening = false;
 let recognition = null;
 
