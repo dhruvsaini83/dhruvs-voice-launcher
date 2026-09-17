@@ -22,6 +22,13 @@ Just say **"Open YouTube"** or **"Open Netflix"** anywhere in your browser, and 
 - **Zero-Latency Instant Matching**: Processes interim speech in real time with debounce cooldown — sites open the moment your command is complete.
 - **Smart Close — Last Tab Protection**: If you say *"Close YouTube"* and it's the **only tab open**, the extension automatically opens a new tab first so your browser stays alive, then closes the target tab.
 
+### ⚡ ON/OFF Voice Toggle *(New!)*
+- **Instant ON/OFF Control**: A dedicated toggle switch in the popup lets you **enable or disable** voice listening with a single click — no need to uninstall or reload the extension.
+- **Persistent State**: Your ON/OFF preference is saved in `chrome.storage.local` — the extension remembers your choice even after closing and reopening the popup.
+- **Mic Auto-Release on OFF**: Turning voice OFF immediately closes the offscreen document and **releases the microphone** — the mic indicator on Windows disappears instantly.
+- **Visual Feedback**: The toggle shows **green "ON"** when listening is active and **red "OFF"** when paused. The status pill and mic button update accordingly.
+- **Respects voiceEnabled on Restart**: Auto-start on browser open and the health-check alarm both honour the toggle — voice won't restart behind your back if you've turned it OFF.
+
 ### 🌐 Smart Website Resolver
 - **50+ Pre-Mapped Sites**: Direct voice-to-URL mappings for:
   - 🎬 **Streaming:** YouTube, Netflix, Amazon Prime Video, Disney+ Hotstar, JioCinema
@@ -38,8 +45,8 @@ Just say **"Open YouTube"** or **"Open Netflix"** anywhere in your browser, and 
 ### 🔒 Privacy & Lifecycle
 - **Mic Active Only While Browser is Open**: Microphone hardware tracks are strictly held **only when at least one browser window is open**.
 - **Instant Release on Browser Close**: When all Chrome windows are closed, speech recognition is immediately aborted and all audio stream tracks are released — the mic indicator on Windows disappears instantly.
-- **Auto-Resume on Browser Open**: Re-opening Chrome automatically restarts the voice listener with no prompts or clicks needed.
-- **Healthcheck Alarm Guard**: A background alarm verifies the listener is healthy while Chrome is open, and skips any restart if no browser windows are detected.
+- **Auto-Resume on Browser Open**: Re-opening Chrome automatically restarts the voice listener with no prompts or clicks needed *(only if voice is ON)*.
+- **Healthcheck Alarm Guard**: A background alarm verifies the listener is healthy while Chrome is open, and skips any restart if no browser windows are detected or if voice is toggled OFF.
 
 ### 🛡️ Reliability
 - **Self-Healing Offscreen Engine**: Runs a resilient Chrome `offscreen` document with continuous audio keepalive and watchdog timer alarms to keep listening active while Chrome is open.
@@ -107,11 +114,11 @@ Upon loading, the **Setup Page** (`setup.html`) will automatically open in a tab
 ```
 Voice Chrome Ext/
 ├── manifest.json         # Chrome MV3 manifest with offscreen & scripting permissions
-├── background.js        # Background service worker (tab control, alarms, confetti injection)
+├── background.js        # Background service worker (tab control, alarms, confetti injection, ON/OFF toggle)
 ├── offscreen.html       # Headless DOM container for continuous microphone listening
 ├── offscreen.js         # SpeechRecognition engine with audio keepalive and smart URL resolver
-├── popup.html           # Modern extension popup displaying real-time hands-free status
-├── popup.js             # Popup logic and status synchronization
+├── popup.html           # Modern extension popup with real-time status & ON/OFF voice toggle
+├── popup.js             # Popup logic, ON/OFF toggle handler, and status synchronization
 ├── setup.html           # One-time microphone permission setup page
 ├── setup.js             # Permission acquisition and offscreen initialization
 ├── samsung_launcher.html# Fullscreen mobile/web voice launcher hub
@@ -125,6 +132,7 @@ Voice Chrome Ext/
 
 - **Microphone blocked?** Click the camera/microphone icon in the Chrome URL bar on the `setup.html` page and select *"Always allow"*.
 - **Extension not hearing commands?** Open `chrome://extensions` and click the **Reload (🔄)** icon on Dhruv's Voice Launcher. Make sure microphone permission is granted.
+- **Voice toggle is OFF but mic still shows?** Try toggling OFF again in the popup — the offscreen document will close and the mic indicator will disappear.
 - **Does it use the mic when Chrome is closed?** **No.** The extension automatically detects when all browser windows are closed and immediately releases the microphone — the Windows taskbar mic indicator will disappear.
 - **Why did a new tab open when I closed a site?** This is intentional! If you close the last remaining tab via voice, the extension opens a new tab first so Chrome doesn't shut down and lose the voice listener.
 - **Microphone access in Windows:** Ensure Windows Settings > Privacy & Security > Microphone has allowed desktop apps to access the microphone.

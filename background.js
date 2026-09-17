@@ -94,9 +94,10 @@ async function ensureOffscreen() {
 }
 
 async function autoStartIfGranted() {
-  const { micGranted } = await chrome.storage.local.get(['micGranted']);
-  console.log("[Dhruv's Voice Launcher - background] autoStartIfGranted, micGranted=", micGranted);
-  if (micGranted) {
+  const { micGranted, voiceEnabled } = await chrome.storage.local.get(['micGranted', 'voiceEnabled']);
+  console.log("[Dhruv's Voice Launcher - background] autoStartIfGranted, micGranted=", micGranted, "voiceEnabled=", voiceEnabled);
+  const enabled = (voiceEnabled === undefined || voiceEnabled === true);
+  if (micGranted && enabled) {
     const hasWindow = await hasOpenBrowserWindow();
     if (hasWindow) {
       await ensureOffscreen();
@@ -121,8 +122,11 @@ chrome.runtime.onInstalled.addListener(async (details) => {
 chrome.alarms.create('voice-launcher-healthcheck', { periodInMinutes: 1 });
 chrome.alarms.onAlarm.addListener(async (alarm) => {
   if (alarm.name !== 'voice-launcher-healthcheck') return;
-  const { micGranted } = await chrome.storage.local.get(['micGranted']);
+  const { micGranted, voiceEnabled } = await chrome.storage.local.get(['micGranted', 'voiceEnabled']);
   if (!micGranted) return;
+
+  const enabled = (voiceEnabled === undefined || voiceEnabled === true);
+  if (!enabled) return; // user has turned off voice
 
   const hasWindow = await hasOpenBrowserWindow();
   if (!hasWindow) {
@@ -177,7 +181,18 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   console.log("[Dhruv's Voice Launcher - background] received message", msg);
 
   if (msg.type === 'START_LISTENING') {
-    ensureOffscreen();
+    // Only start if voiceEnabled is not false
+    chrome.storage.local.get(['voiceEnabled'], async (data) => {
+      const enabled = (data.voiceEnabled === undefined || data.voiceEnabled === true);
+      if (enabled) {
+        await ensureOffscreen();
+      }
+    });
+    sendResponse({ ok: true });
+  }
+
+  if (msg.type === 'STOP_LISTENING') {
+    stopListeningAndCloseOffscreen();
     sendResponse({ ok: true });
   }
 
